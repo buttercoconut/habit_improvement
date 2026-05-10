@@ -1,47 +1,29 @@
 from sqlalchemy.orm import Session
-from ..models.db_models import User, Goal
-from ..models.user import UserCreate
-from ..models.goal import GoalCreate
-from passlib.context import CryptContext
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+from ..models.user import User, UserCreate
+from ..models.goal import Goal, GoalCreate
 
 class UserService:
-    def __init__(self, db: Session):
-        self.db = db
+    @staticmethod
+    def create_user(db: Session, user_in: UserCreate) -> User:
+        user = User(email=user_in.email, full_name=user_in.full_name)
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return user
 
-    def get_all_users(self):
-        return self.db.query(User).all()
-
-    def create_user(self, user_in: UserCreate):
-        hashed_password = pwd_context.hash(user_in.password)
-        db_user = User(email=user_in.email, full_name=user_in.full_name, hashed_password=hashed_password)
-        self.db.add(db_user)
-        self.db.commit()
-        self.db.refresh(db_user)
-        return db_user
+    @staticmethod
+    def get_all_users(db: Session):
+        return db.query(User).all()
 
 class GoalService:
-    def __init__(self, db: Session):
-        self.db = db
+    @staticmethod
+    def create_goal(db: Session, goal_in: GoalCreate) -> Goal:
+        goal = Goal(**goal_in.dict())
+        db.add(goal)
+        db.commit()
+        db.refresh(goal)
+        return goal
 
-    def get_all_goals(self):
-        return self.db.query(Goal).all()
-
-    def get_goal(self, goal_id: int):
-        return self.db.query(Goal).filter(Goal.id == goal_id).first()
-
-    def create_goal(self, goal_in: GoalCreate):
-        db_goal = Goal(**goal_in.dict())
-        self.db.add(db_goal)
-        self.db.commit()
-        self.db.refresh(db_goal)
-        return db_goal
-
-    def calculate_completion(self, goal: Goal):
-        # Simple completion: progress field already represents completion
-        return goal.progress
-
-    def recommend_content(self, user_id: int):
-        # Placeholder for collaborative/content-based filtering
-        return ["Sample content 1", "Sample content 2"]
+    @staticmethod
+    def get_goals_by_user(db: Session, user_id: int):
+        return db.query(Goal).filter(Goal.user_id == user_id).all()

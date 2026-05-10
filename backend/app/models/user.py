@@ -12,7 +12,21 @@ class UserCreate(UserBase):
 class User(UserBase):
     id: int
     created_at: datetime
-    updated_at: datetime
+    class Config:
+        orm_mode = True
 
+class GoalBase(BaseModel):
+    title: str
+    description: Optional[str] = None
+    target_date: datetime
+
+class GoalCreate(GoalBase):
+    pass
+
+class Goal(GoalBase):
+    id: int
+    user_id: int
+    progress: float = 0.0
+    created_at: datetime
     class Config:
         orm_mode = True

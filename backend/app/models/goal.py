@@ -1,21 +1,18 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import Optional
 
 class GoalBase(BaseModel):
     title: str
-    description: Optional[str] = None
+    description: str | None = None
     target_date: datetime
 
 class GoalCreate(GoalBase):
-    user_id: int
+    pass
 
 class Goal(GoalBase):
     id: int
     user_id: int
+    progress: float = 0.0
     created_at: datetime
-    updated_at: datetime
-    progress: float = 0.0  # 0.0 to 1.0
-
     class Config:
         orm_mode = True
